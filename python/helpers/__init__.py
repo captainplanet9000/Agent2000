@@ -3,7 +3,14 @@ Python helpers package for the Agent2000 application.
 This package contains various utility modules used throughout the application.
 """
 
-# First import runtime to get its __all__
+# First, define IS_WINDOWS here to break the circular import
+import os
+import sys
+
+# Define platform detection here to avoid circular imports
+IS_WINDOWS = os.name == 'nt'
+
+# Now import runtime (which will use our IS_WINDOWS constant)
 from . import runtime
 
 # Then import everything else
@@ -20,6 +27,9 @@ runtime_exports = getattr(runtime, '__all__', [])
 
 # Define our exports
 exports = [
+    # Platform detection
+    'IS_WINDOWS',
+    
     # From dotenv
     'load_dotenv',
     
