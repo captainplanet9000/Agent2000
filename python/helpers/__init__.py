@@ -3,9 +3,11 @@ Python helpers package for the Agent2000 application.
 This package contains various utility modules used throughout the application.
 """
 
-# Export common functions and classes for easier access
+# First import runtime to get its __all__
+from . import runtime
+
+# Then import everything else
 from .dotenv import load_dotenv
-from .runtime import *
 from .rate_limiter import RateLimiter
 from .extract_tools import *
 from .files import *
@@ -13,7 +15,11 @@ from .errors import *
 from .history import *
 from .tokens import *
 
-__all__ = [
+# Get the runtime exports
+runtime_exports = getattr(runtime, '__all__', [])
+
+# Define our exports
+exports = [
     # From dotenv
     'load_dotenv',
     
@@ -73,7 +79,17 @@ __all__ = [
     'tokenize_json',
     'detokenize_json',
     'get_model_context_size',
-    
-    # From runtime (exported via *)
-    *__all__  # Include all exports from runtime
 ]
+
+# Add runtime exports
+for name in runtime_exports:
+    if name not in exports:  # Avoid duplicates
+        exports.append(name)
+
+# Set __all__
+__all__ = exports
+
+# Clean up
+import sys
+del sys.modules[__name__].runtime_exports
+del sys.modules[__name__].exports
