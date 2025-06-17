@@ -2,8 +2,8 @@
 FROM python:3.10-slim as builder
 
 # Set environment variables
-ENV PYTHONPATH="${PYTHONPATH}:/app"
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH="/app:${PYTHONPATH}"
 
 # Set the working directory
 WORKDIR /app
@@ -27,11 +27,14 @@ COPY . .
 FROM python:3.10-slim
 
 # Set environment variables
-ENV PYTHONPATH="${PYTHONPATH}:/app"
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH="/app:${PYTHONPATH}"
 
 # Set the working directory
 WORKDIR /app
+
+# Create necessary directory structure
+RUN mkdir -p /app/python/helpers
 
 # Copy installed packages
 COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
@@ -40,8 +43,9 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # Copy application code
 COPY --from=builder /app /app
 
-# Create necessary directory structure
-RUN mkdir -p /app/python/helpers
+# Ensure the python package is in the Python path
+RUN echo "import sys; print('Python path:', sys.path)" > /app/check_path.py && \
+    python /app/check_path.py
 
 # Expose the port the app runs on
 EXPOSE 8080
